@@ -13,6 +13,7 @@ app.use(express.json());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ptqba.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -29,53 +30,53 @@ async function run() {
 
         const equipmentCollection = client.db("restaurantDB").collection("restaurant")
         // const userCollection = client.db("coffeeDB").collection("users")
-                // app.post('/equipment', async (req, res) => {
-                //     const newEquipment = req.body;
-                //     console.log(newEquipment);
-                //     const result = await equipmentCollection.insertOne(newEquipment);
-                //     res.send(result);
-                // })
-                // app.get('/equipment', async (req, res) => {
-                //     // db.collectionName.find().limit(6);
-                //     const result = await equipmentCollection.find().limit(8);
-                //     res.send(result);
-                // })
-                // app.get('/equipment/:id', async (req, res) => {
-                //     const id = req.params.id;
-                //     const query = { _id: new ObjectId(id) }
-                //     const result = await equipmentCollection.findOne(query);
-                //     res.send(result);
-                // })
-                // app.delete('/equipment/:id', async (req, res) => {
-                //     const id = req.params.id;
-                //     const query = { _id: new ObjectId(id) };
-                //     const result = await equipmentCollection.deleteOne(query);
-                //     res.send(result);
-                // })
-                // app.put('/equipment/:id', async (req, res) => {
-                //     const id = req.params.id;
-                //     const filter = { _id: new ObjectId(id) };
-                //     const options = { upsert: true };
-                //     const updated = req.body;
-                //     const equipment = {
-                //         $set: {
-                //             image: updated.image,
-                //             itemName: updated.itemName,
-                //             categoryName: updated.categoryName,
-                //             description: updated.description,
-                //             price: updated.price,
-                //             rating: updated.rating,
-                //             batWithGrip: updated.batWithGrip,
-                //             hitPaper: updated.hitPaper,
-                //             processingTime: updated.processingTime,
-                //             stockStatus: updated.stockStatus
-                //         }
-                //     }
-                //     const result = await equipmentCollection.updateOne(filter, equipment, options);
-                //     res.send(result);
-                // }
+        // app.post('/equipment', async (req, res) => {
+        //     const newEquipment = req.body;
+        //     console.log(newEquipment);
+        //     const result = await equipmentCollection.insertOne(newEquipment);
+        //     res.send(result);
+        // })
+        // app.get('/equipment', async (req, res) => {
+        //     // db.collectionName.find().limit(6);
+        //     const result = await equipmentCollection.find().limit(8);
+        //     res.send(result);
+        // })
+        // app.get('/equipment/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = { _id: new ObjectId(id) }
+        //     const result = await equipmentCollection.findOne(query);
+        //     res.send(result);
+        // })
+        // app.delete('/equipment/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = { _id: new ObjectId(id) };
+        //     const result = await equipmentCollection.deleteOne(query);
+        //     res.send(result);
+        // })
+        // app.put('/equipment/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: new ObjectId(id) };
+        //     const options = { upsert: true };
+        //     const updated = req.body;
+        //     const equipment = {
+        //         $set: {
+        //             image: updated.image,
+        //             itemName: updated.itemName,
+        //             categoryName: updated.categoryName,
+        //             description: updated.description,
+        //             price: updated.price,
+        //             rating: updated.rating,
+        //             batWithGrip: updated.batWithGrip,
+        //             hitPaper: updated.hitPaper,
+        //             processingTime: updated.processingTime,
+        //             stockStatus: updated.stockStatus
+        //         }
+        //     }
+        //     const result = await equipmentCollection.updateOne(filter, equipment, options);
+        //     res.send(result);
+        // }
 
-                // )
+        // )
 
 
         // Send a ping to confirm a successful connection
