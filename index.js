@@ -36,17 +36,7 @@ async function run() {
             const result = await foodCollection.insertOne(foodAdded);
             res.send(result);
         })
-        // get all food data from db
-        // app.get('/foods', async (req, res) => {
-        //     const page = parseInt(req.query.page)
-        //     const size = parseInt(req.query.size)
-        //     const result = await foodCollection.find()
-        //     .skip(page*size)
-        //     .limit(size)
-        //     .toArray();
-        //     res.send(result);
-        // })
-        // get a single job data by id from db
+  
         app.get('/food/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
