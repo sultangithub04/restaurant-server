@@ -14,6 +14,7 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ptqba.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -35,30 +36,17 @@ async function run() {
             const result = await foodCollection.insertOne(foodAdded);
             res.send(result);
         })
-  
-        app.get('/food/:id', async (req, res) => {
-            const id = req.params.id
-            const query = { _id: new ObjectId(id) }
-            const result = await foodCollection.findOne(query)
-            res.send(result)
-        })
-        app.get('/food/:id', async (req, res) => {
-            const id = req.params.id
-            const query = { _id: new ObjectId(id) }
-            const result = await foodCollection.findOne(query)
-            res.send(result)
-        })
-        app.get('/food/:id', async (req, res) => {
-            const id = req.params.id
-            const query = { _id: new ObjectId(id) }
-            const result = await foodCollection.findOne(query)
-            res.send(result)
-        })
-        app.get('/food/:id', async (req, res) => {
-            const id = req.params.id
-            const query = { _id: new ObjectId(id) }
-            const result = await foodCollection.findOne(query)
-            res.send(result)
+        // get all food data from db
+        // app.get('/foods', async (req, res) => {
+        //     const page = parseInt(req.query.page)
+        //     const size = parseInt(req.query.size)
+        //     const result = await foodCollection.find()
+        //     .skip(page*size)
+        //     .limit(size)
+        //     .toArray();
+        //     res.send(result);
+        // })
+        // get a single job data by id from db
         app.get('/food/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
@@ -71,17 +59,6 @@ async function run() {
             res.send({ count });
           })
         // all food page
-        app.get('/foods', async (req, res) => {
-            const page = parseInt(req.query.page)
-            const size = parseInt(req.query.size)
-            const search = req.query.search
-            console.log(search);
-            let query = {
-                foodName: {
-                  $regex: search,
-                  $options: 'i',
-                },
-              }
         app.get('/foods', async (req, res) => {
             const page = parseInt(req.query.page)
             const size = parseInt(req.query.size)
