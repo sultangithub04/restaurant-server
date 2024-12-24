@@ -54,6 +54,12 @@ async function run() {
             const result = await foodCollection.findOne(query)
             res.send(result)
         })
+        app.get('/food/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await foodCollection.findOne(query)
+            res.send(result)
+        })
         // food count
         app.get('/foodCount', async (req, res) => {
             count = await foodCollection.estimatedDocumentCount();
