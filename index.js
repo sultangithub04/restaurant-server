@@ -28,15 +28,57 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
 
-        const equipmentCollection = client.db("restaurantDB").collection("restaurant")
-        // const userCollection = client.db("coffeeDB").collection("users")
-        // app.post('/equipment', async (req, res) => {
-        //     const newEquipment = req.body;
-        //     console.log(newEquipment);
-        //     const result = await equipmentCollection.insertOne(newEquipment);
+        const foodCollection = client.db("foodDB").collection("food")
+        // add  food data to db
+        app.post('/addfood', async (req, res) => {
+            const foodAdded = req.body;
+            console.log(foodAdded);
+            const result = await foodCollection.insertOne(foodAdded);
+            res.send(result);
+        })
+        // get all food data from db
+        // app.get('/foods', async (req, res) => {
+        //     const page = parseInt(req.query.page)
+        //     const size = parseInt(req.query.size)
+        //     const result = await foodCollection.find()
+        //     .skip(page*size)
+        //     .limit(size)
+        //     .toArray();
         //     res.send(result);
         // })
-        // app.get('/equipment', async (req, res) => {
+        // get a single job data by id from db
+        app.get('/food/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await foodCollection.findOne(query)
+            res.send(result)
+        })
+        // food count
+        app.get('/foodCount', async (req, res) => {
+            count = await foodCollection.estimatedDocumentCount();
+            res.send({ count });
+          })
+        // all food page
+        app.get('/foods', async (req, res) => {
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+            const search = req.query.search
+            console.log(search);
+            let query = {
+                foodName: {
+                  $regex: search,
+                  $options: 'i',
+                },
+              }
+            const result = await foodCollection.find(query)
+                .skip(page * size)
+                .limit(size)
+                .toArray();
+            res.send(result);
+        })
+
+
+        // app.get('/addfood', async (req, res) => {
         //     // db.collectionName.find().limit(6);
         //     const result = await equipmentCollection.find().limit(8);
         //     res.send(result);
@@ -91,8 +133,8 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Spots Zone server is running')
+    res.send('Food Zone server is running')
 });
 app.listen(port, () => {
-    console.log(`Spots server is running on port ${port}`);
+    console.log(`Food server is running on port ${port}`);
 })
