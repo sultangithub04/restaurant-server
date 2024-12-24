@@ -82,6 +82,17 @@ async function run() {
                   $options: 'i',
                 },
               }
+        app.get('/foods', async (req, res) => {
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+            const search = req.query.search
+            console.log(search);
+            let query = {
+                foodName: {
+                  $regex: search,
+                  $options: 'i',
+                },
+              }
             const result = await foodCollection.find(query)
                 .skip(page * size)
                 .limit(size)
