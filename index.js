@@ -37,22 +37,14 @@ async function run() {
             res.send(result);
         })
         // get all food data from db
-        // app.get('/foods', async (req, res) => {
-        //     const page = parseInt(req.query.page)
-        //     const size = parseInt(req.query.size)
-        //     const result = await foodCollection.find()
-        //     .skip(page*size)
-        //     .limit(size)
-        //     .toArray();
-        //     res.send(result);
-        // })
-        // get a single job data by id from db
+
         app.get('/food/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await foodCollection.findOne(query)
             res.send(result)
         })
+  
         // food count
         app.get('/foodCount', async (req, res) => {
             count = await foodCollection.estimatedDocumentCount();
@@ -77,7 +69,13 @@ async function run() {
             res.send(result);
         })
 
+// get all food for top food page
 
+app.get('/topFood', async(req, res)=>{
+const result= await foodCollection.find().limit(6).toArray();
+res.send(result)
+}
+)
         // app.get('/addfood', async (req, res) => {
         //     // db.collectionName.find().limit(6);
         //     const result = await equipmentCollection.find().limit(8);
