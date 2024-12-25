@@ -29,11 +29,41 @@ async function run() {
         // await client.connect();
 
         const foodCollection = client.db("foodDB").collection("food")
+        const purchaseCollection = client.db("foodDB").collection("purchase")
         // add  food data to db
         app.post('/addfood', async (req, res) => {
             const foodAdded = req.body;
-            console.log(foodAdded);
             const result = await foodCollection.insertOne(foodAdded);
+            res.send(result);
+        })
+        //food purchase 
+        app.post('/purchase', async (req, res) => {
+            const purchase = req.body;
+            console.log(purchase);
+            const result = await purchaseCollection.insertOne(purchase);
+            const filter = { _id: new ObjectId(purchase.foodId) }
+            const update = {
+                $inc: { purchaseCount: 1 },
+            }
+            const updateFoodCount = await foodCollection.updateOne(filter, update)
+            console.log(updateFoodCount)
+            res.send(result);
+        })
+       
+        //food order page 
+        app.get('/purchase/:email', async (req, res) => {
+            const email = req.params.email
+            // console.log(email);
+            const query = { buyerEmail: email }
+            const result = await purchaseCollection.find(query).toArray();
+            res.send(result)
+        }
+        )
+        // food delete
+        app.delete('/delete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await purchaseCollection.deleteOne(query);
             res.send(result);
         })
         // get all food data from db
@@ -44,24 +74,24 @@ async function run() {
             const result = await foodCollection.findOne(query)
             res.send(result)
         })
-  
+
         // food count
         app.get('/foodCount', async (req, res) => {
             count = await foodCollection.estimatedDocumentCount();
             res.send({ count });
-          })
+        })
         // all food page
         app.get('/foods', async (req, res) => {
             const page = parseInt(req.query.page)
             const size = parseInt(req.query.size)
             const search = req.query.search
-            console.log(search);
+            // console.log(search);
             let query = {
                 foodName: {
-                  $regex: search,
-                  $options: 'i',
+                    $regex: search,
+                    $options: 'i',
                 },
-              }
+            }
             const result = await foodCollection.find(query)
                 .skip(page * size)
                 .limit(size)
@@ -69,55 +99,36 @@ async function run() {
             res.send(result);
         })
 
-// get all food for top food page
+        // get all food for top food page
 
-app.get('/topFood', async(req, res)=>{
-const result= await foodCollection.find().limit(6).toArray();
-res.send(result)
-}
-)
-        // app.get('/addfood', async (req, res) => {
-        //     // db.collectionName.find().limit(6);
-        //     const result = await equipmentCollection.find().limit(8);
-        //     res.send(result);
-        // })
-        // app.get('/equipment/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const query = { _id: new ObjectId(id) }
-        //     const result = await equipmentCollection.findOne(query);
-        //     res.send(result);
-        // })
-        // app.delete('/equipment/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const query = { _id: new ObjectId(id) };
-        //     const result = await equipmentCollection.deleteOne(query);
-        //     res.send(result);
-        // })
-        // app.put('/equipment/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const filter = { _id: new ObjectId(id) };
-        //     const options = { upsert: true };
-        //     const updated = req.body;
-        //     const equipment = {
-        //         $set: {
-        //             image: updated.image,
-        //             itemName: updated.itemName,
-        //             categoryName: updated.categoryName,
-        //             description: updated.description,
-        //             price: updated.price,
-        //             rating: updated.rating,
-        //             batWithGrip: updated.batWithGrip,
-        //             hitPaper: updated.hitPaper,
-        //             processingTime: updated.processingTime,
-        //             stockStatus: updated.stockStatus
-        //         }
-        //     }
-        //     const result = await equipmentCollection.updateOne(filter, equipment, options);
-        //     res.send(result);
-        // }
+        app.get('/topFood', async (req, res) => {
+            const result = await foodCollection.find().sort({ purchaseCount: -1 }).limit(6).toArray();
+            res.send(result)
+        }
+        )
+        // myAdded food
+        app.get('/myFood/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email }
+            const result = await foodCollection.find(query).toArray();
+            res.send(result)
+        }
+        )
+        //   update food data
 
-        // )
-
+        app.put('/update-food/:id', async (req, res) => {
+            const id = req.params.id
+            const foodData = req.body
+            const updated = {
+                $set: foodData,
+            }
+            const query = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const result = await foodCollection.updateOne(query, updated, options)
+            // console.log(result)
+            res.send(result)
+        })
+       
 
         // Send a ping to confirm a successful connection
         // await client.db("admin").command({ ping: 1 });
