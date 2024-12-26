@@ -1,16 +1,21 @@
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
+const cookieParser = require('cookie-parser')
 const port = process.env.PORT || 5000;
 
 
-app.use(cors());
+const corsOptions = {
+    origin: ['http://localhost:5173'],
+    credentials: true,
+    optionalSuccessStatus: 200,
+}
+app.use(cors(corsOptions))
 app.use(express.json());
-
+app.use(cookieParser())
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ptqba.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -23,6 +28,19 @@ const client = new MongoClient(uri, {
     }
 });
 
+// verifyToken
+const verifyToken = (req, res, next) => {
+    const token = req.cookies?.token
+    if (!token) return res.status(401).send({ message: 'unauthorized access' })
+    jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: 'unauthorized access' })
+        }
+        req.user = decoded
+    })
+
+    next()
+}
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
@@ -30,6 +48,34 @@ async function run() {
 
         const foodCollection = client.db("foodDB").collection("food")
         const purchaseCollection = client.db("foodDB").collection("purchase")
+
+            // generate jwt
+    app.post('/jwt', async (req, res) => {
+      const email = req.body
+      // create token
+      const token = jwt.sign(email, process.env.SECRET_KEY, {
+        expiresIn: '365d',
+      })
+      // console.log(token)
+      res
+        .cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        })
+        .send({ success: true })
+    })
+
+    // logout || clear cookie from browser
+    app.get('/logout', async (req, res) => {
+      res
+        .clearCookie('token', {
+          maxAge: 0,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        })
+        .send({ success: true })
+    })
         // add  food data to db
         app.post('/addfood', async (req, res) => {
             const foodAdded = req.body;
@@ -49,11 +95,16 @@ async function run() {
             console.log(updateFoodCount)
             res.send(result);
         })
-       
+
         //food order page 
-        app.get('/purchase/:email', async (req, res) => {
+        app.get('/purchase/:email', verifyToken, async (req, res) => {
             const email = req.params.email
-            // console.log(email);
+            const decodedEmail = req.user?.email
+            // console.log("from user",email);
+            // console.log("from token", decodedEmail);
+            if (decodedEmail !== email)
+                return res.status(401).send({ message: 'unauthorized access' })
+            // console.log(req.user.email);
             const query = { buyerEmail: email }
             const result = await purchaseCollection.find(query).toArray();
             res.send(result)
@@ -68,7 +119,7 @@ async function run() {
         })
         // get all food data from db
 
-        app.get('/food/:id', async (req, res) => {
+        app.get('/food/:id',verifyToken, async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await foodCollection.findOne(query)
@@ -128,7 +179,7 @@ async function run() {
             // console.log(result)
             res.send(result)
         })
-       
+
 
         // Send a ping to confirm a successful connection
         // await client.db("admin").command({ ping: 1 });
