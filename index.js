@@ -9,14 +9,14 @@ const port = process.env.PORT || 5000;
 
 app.use(
     cors({
-      origin: [
-        "http://localhost:5173",
-        "https://restaurant-a10-ph.web.app",
-        "https://restaurant-a10-ph.firebaseapp.com",
-      ],
-      credentials: true,
+        origin: [
+            "http://localhost:5173",
+            "https://restaurant-a10-ph.web.app",
+            "https://restaurant-a10-ph.firebaseapp.com",
+        ],
+        credentials: true,
     })
-  );
+);
 app.use(express.json());
 app.use(cookieParser())
 
@@ -52,43 +52,50 @@ async function run() {
         const foodCollection = client.db("foodDB").collection("food")
         const purchaseCollection = client.db("foodDB").collection("purchase")
 
-            // generate jwt
-    app.post('/jwt', async (req, res) => {
-      const email = req.body
-      // create token
-      const token = jwt.sign(email, process.env.SECRET_KEY, {
-        expiresIn: '365d',
-      })
-      // console.log(token)
-      res
-        .cookie('token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        // generate jwt
+        app.post('/jwt', async (req, res) => {
+            const email = req.body
+            // create token
+            const token = jwt.sign(email, process.env.SECRET_KEY, {
+                expiresIn: '365d',
+            })
+            // console.log(token)
+            res
+                .cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                })
+                .send({ success: true })
         })
-        .send({ success: true })
-    })
 
-    // logout || clear cookie from browser
-    app.get('/logout', async (req, res) => {
-      res
-        .clearCookie('token', {
-          maxAge: 0,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        // logout || clear cookie from browser
+        app.get('/logout', async (req, res) => {
+            res.clearCookie('token', {
+                maxAge: 0,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            })
+                .send({ success: true })
         })
-        .send({ success: true })
-    })
         // add  food data to db
-        app.post('/addfood', async (req, res) => {
+        app.post('/addfood', verifyToken, async (req, res) => {
             const foodAdded = req.body;
+            // console.log(foodAdded.email);
+            const decodedEmail = req.user?.email
+            // console.log("from user",foodAdded.email);
+            // console.log("from token", decodedEmail);
+            if (decodedEmail !== foodAdded.email)
+                return res.status(401).send({ message: 'unauthorized access' })
             const result = await foodCollection.insertOne(foodAdded);
             res.send(result);
         })
         //food purchase 
-        app.post('/purchase', async (req, res) => {
+        app.post('/purchase',verifyToken, async (req, res) => {
             const purchase = req.body;
-            // console.log(purchase);
+            const decodedEmail = req.user?.email
+            if (decodedEmail !== purchase.buyerEmail)
+                return res.status(401).send({ message: 'unauthorized access' })
             const result = await purchaseCollection.insertOne(purchase);
             const filter = { _id: new ObjectId(purchase.foodId) }
             const update = {
