@@ -8,8 +8,8 @@ This platform allows restaurant owners and customers to seamlessly interact thro
 
 
 
-Live URL
-
+Live URL: 
+https://restaurant-a10-ph.web.app
 
  Private Features (User Login Required)
 1. Authentication  
