@@ -7,13 +7,16 @@ const app = express();
 const cookieParser = require('cookie-parser')
 const port = process.env.PORT || 5000;
 
-
-const corsOptions = {
-    origin: ['http://localhost:5173'],
-    credentials: true,
-    optionalSuccessStatus: 200,
-}
-app.use(cors(corsOptions))
+app.use(
+    cors({
+      origin: [
+        "http://localhost:5173",
+        "https://restaurant-a10-ph.web.app",
+        "https://restaurant-a10-ph.firebaseapp.com",
+      ],
+      credentials: true,
+    })
+  );
 app.use(express.json());
 app.use(cookieParser())
 
@@ -85,14 +88,14 @@ async function run() {
         //food purchase 
         app.post('/purchase', async (req, res) => {
             const purchase = req.body;
-            console.log(purchase);
+            // console.log(purchase);
             const result = await purchaseCollection.insertOne(purchase);
             const filter = { _id: new ObjectId(purchase.foodId) }
             const update = {
                 $inc: { purchaseCount: 1 },
             }
             const updateFoodCount = await foodCollection.updateOne(filter, update)
-            console.log(updateFoodCount)
+            // console.log(updateFoodCount)
             res.send(result);
         })
 
@@ -119,7 +122,7 @@ async function run() {
         })
         // get all food data from db
 
-        app.get('/food/:id',verifyToken, async (req, res) => {
+        app.get('/food/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await foodCollection.findOne(query)
