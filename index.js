@@ -91,7 +91,7 @@ async function run() {
             res.send(result);
         })
         //food purchase 
-        app.post('/purchase',verifyToken, async (req, res) => {
+        app.post('/purchase', verifyToken, async (req, res) => {
             const purchase = req.body;
             const decodedEmail = req.user?.email
             if (decodedEmail !== purchase.buyerEmail)
